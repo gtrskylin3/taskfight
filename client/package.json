@@ -1,0 +1,22 @@
+{
+  "name": "taskfight-client",
+  "version": "1.0.0",
+  "description": "Frontend for TaskFight application",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": ["taskfight", "todo", "timer", "gamification"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "vite": "^7.3.1",
+    "@tailwindcss/vite": "^4.1.18"
+  },
+  "dependencies": {
+    "alpinejs": "^3.15.6",
+    "tailwindcss": "^4.1.18"
+  }
+}

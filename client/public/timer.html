@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Timer - TaskFight</title>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="/src/main.js" type="module"></script>
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col">
+    <div x-data="timerApp()" class="flex-grow flex flex-col items-center justify-center">
+        <!-- Back button -->
+        <div class="absolute top-4 left-4">
+            <a href="/" class="btn-secondary">← Back to Tasks</a>
+        </div>
+        
+        <!-- Current task info -->
+        <div class="text-center mb-8">
+            <h2 x-text="currentTask?.name || 'Loading...'" class="text-2xl font-bold mb-2"></h2>
+            <div class="flex items-center justify-center space-x-4">
+                <span class="px-2 py-1 rounded text-sm" 
+                      :class="{
+                          'bg-green-500': currentTask?.priority === 'low',
+                          'bg-yellow-500': currentTask?.priority === 'medium', 
+                          'bg-red-500': currentTask?.priority === 'high'
+                      }" 
+                      x-text="currentTask?.priority"></span>
+                <span class="bg-indigo-500 px-2 py-1 rounded text-sm" x-text="currentTask?.tag"></span>
+            </div>
+        </div>
+        
+        <!-- Timer Display -->
+        <div class="timer-display" x-text="formatTime(remainingSeconds)"></div>
+        
+        <!-- Progress Bar -->
+        <div class="w-4/5 max-w-lg mb-10">
+            <div class="flex justify-between text-sm mb-1">
+                <span x-text="`${Math.round(progressPercentage)}% Complete`"></span>
+                <span x-text="`${timeSpentMinutes}/${currentTask?.timer || 0} min`"></span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" :style="`width: ${progressPercentage}%`"></div>
+            </div>
+        </div>
+        
+        <!-- Timer Controls -->
+        <div class="timer-controls">
+            <button @click="toggleTimer" :disabled="!currentTask" class="btn-primary px-6 py-3" x-text="isRunning ? 'Pause' : 'Resume'"></button>
+            <button @click="stopTimer" :disabled="!currentTask" class="btn-secondary px-6 py-3">Stop</button>
+            <button @click="completeTask" :disabled="!currentTask" class="btn-primary px-6 py-3">Complete</button>
+        </div>
+    </div>
+
+    <script>
+        function timerApp() {
+            return {
+                currentTask: null,
+                taskId: null,
+                remainingSeconds: 0,
+                isRunning: false,
+                timerInterval: null,
+                
+                get progressPercentage() {
+                    if (!this.currentTask || this.currentTask.timer <= 0) return 0;
+                    const totalTimeSeconds = this.currentTask.timer * 60;
+                    const elapsedSeconds = totalTimeSeconds - this.remainingSeconds;
+                    return (elapsedSeconds / totalTimeSeconds) * 100;
+                },
+                
+                get timeSpentMinutes() {
+                    if (!this.currentTask) return 0;
+                    const totalTimeSeconds = this.currentTask.timer * 60;
+                    const elapsedSeconds = totalTimeSeconds - this.remainingSeconds;
+                    return Math.round(elapsedSeconds / 60);
+                },
+                
+                async init() {
+                    // Get task ID from URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    this.taskId = parseInt(urlParams.get('taskId'));
+                    
+                    if (this.taskId) {
+                        await this.loadTask();
+                        this.remainingSeconds = (this.currentTask.timer - this.currentTask.time_spent) * 60;
+                        
+                        // Start the timer if it was previously running
+                        if (this.currentTask.is_active) {
+                            this.startTimer();
+                        }
+                    }
+                },
+                
+                async loadTask() {
+                    try {
+                        const response = await fetch(`http://localhost:8000/tasks/${this.taskId}`);
+                        this.currentTask = await response.json();
+                    } catch (error) {
+                        console.error('Error loading task:', error);
+                    }
+                },
+                
+                formatTime(seconds) {
+                    const mins = Math.floor(seconds / 60);
+                    const secs = seconds % 60;
+                    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                },
+                
+                startTimer() {
+                    if (this.timerInterval) clearInterval(this.timerInterval);
+                    
+                    this.isRunning = true;
+                    this.timerInterval = setInterval(() => {
+                        if (this.remainingSeconds > 0) {
+                            this.remainingSeconds--;
+                        } else {
+                            this.endTimer();
+                        }
+                    }, 1000);
+                },
+                
+                pauseTimer() {
+                    this.isRunning = false;
+                    if (this.timerInterval) {
+                        clearInterval(this.timerInterval);
+                        this.timerInterval = null;
+                    }
+                },
+                
+                toggleTimer() {
+                    if (this.isRunning) {
+                        this.pauseTimer();
+                        this.sendPauseRequest();
+                    } else {
+                        this.startTimer();
+                        this.sendResumeRequest();
+                    }
+                },
+                
+                endTimer() {
+                    this.pauseTimer();
+                    alert('Timer completed!');
+                    // Optionally navigate back to tasks
+                    window.location.href = '/';
+                },
+                
+                async sendPauseRequest() {
+                    try {
+                        await fetch(`http://localhost:8000/tasks/${this.taskId}/pause-timer`, {
+                            method: 'POST'
+                        });
+                    } catch (error) {
+                        console.error('Error pausing timer:', error);
+                    }
+                },
+                
+                async sendResumeRequest() {
+                    try {
+                        await fetch(`http://localhost:8000/tasks/${this.taskId}/start-timer`, {
+                            method: 'POST'
+                        });
+                    } catch (error) {
+                        console.error('Error resuming timer:', error);
+                    }
+                },
+                
+                async stopTimer() {
+                    this.pauseTimer();
+                    
+                    try {
+                        const response = await fetch(`http://localhost:8000/tasks/${this.taskId}/stop-timer`, {
+                            method: 'POST'
+                        });
+                        
+                        if (response.ok) {
+                            window.location.href = '/';
+                        }
+                    } catch (error) {
+                        console.error('Error stopping timer:', error);
+                    }
+                },
+                
+                async completeTask() {
+                    if (!confirm('Are you sure you want to complete this task?')) return;
+                    
+                    this.pauseTimer();
+                    
+                    try {
+                        const response = await fetch(`http://localhost:8000/tasks/${this.taskId}/complete`, {
+                            method: 'POST'
+                        });
+                        
+                        if (response.ok) {
+                            window.location.href = '/';
+                        }
+                    } catch (error) {
+                        console.error('Error completing task:', error);
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

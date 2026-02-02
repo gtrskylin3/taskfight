@@ -7,7 +7,7 @@ services:
     env_file:
       - .env
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"  # Bind to localhost only
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -26,7 +26,7 @@ services:
       dockerfile: Dockerfile.backend
     container_name: taskfight-backend
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"  # Bind to localhost only
     depends_on:
       db:
         condition: service_healthy
@@ -45,11 +45,11 @@ services:
       dockerfile: Dockerfile.frontend
     container_name: taskfight-frontend
     ports:
-      - "5173:5173"
+      - "127.0.0.1:5173:5173"  # Bind to localhost only
     depends_on:
       - backend
     environment:
-      - BACKEND_URL=http://localhost:8000
+      - BACKEND_URL=http://backend:8000  # Use service name for internal communication
     restart: unless-stopped
     deploy:
       resources:

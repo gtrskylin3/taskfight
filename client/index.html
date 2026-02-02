@@ -360,7 +360,12 @@
                     let filtered = this.tasks;
 
                     // Apply filter based on activeFilter
-                    if (this.activeFilter === 'in-progress') {
+                    if (this.activeFilter === 'all') {
+                        // Show all tasks except completed ones on the main tasks view
+                        if (this.currentView === 'tasks') {
+                            filtered = filtered.filter(task => !task.is_completed);
+                        }
+                    } else if (this.activeFilter === 'in-progress') {
                         filtered = filtered.filter(task => task.time_spent > 0 && !task.is_completed);
                     }
 
@@ -403,7 +408,8 @@
 
                 async loadTasks() {
                     try {
-                        const response = await fetch('http://localhost:8000/tasks/active');
+                        // Load all tasks for both main view and statistics
+                        const response = await fetch('http://localhost:8000/tasks');
                         this.tasks = await response.json();
                     } catch (error) {
                         console.error('Error loading tasks:', error);

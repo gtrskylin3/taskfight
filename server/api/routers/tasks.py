@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from server.database.db import get_db
 from server.services.task import TaskService
 from server.repositories.task import TaskRepository
-from server.schemes.task import TaskCreate, TaskUpdate, TaskResponse
+from server.schemes.task import TaskCreate, TaskUpdate, TaskResponse, TimerUpdate
 
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
@@ -116,9 +116,12 @@ async def pause_timer(
 
 @router.post("/{task_id}/stop-timer", response_model=TaskResponse)
 async def stop_timer(
-    task_id: int, task_service: TaskService = Depends(get_task_service)
+    task_id: int,
+    timer_update: TimerUpdate,
+    task_service: TaskService = Depends(get_task_service)
 ):
-    task = await task_service.stop_timer(task_id)
+    print(timer_update.time_elapsed)
+    task = await task_service.stop_timer(task_id, timer_update.time_elapsed)
     if not task:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Task not found"
@@ -128,7 +131,8 @@ async def stop_timer(
 
 @router.post("/{task_id}/complete", response_model=TaskResponse)
 async def complete_task(
-    task_id: int, task_service: TaskService = Depends(get_task_service)
+    task_id: int,
+    task_service: TaskService = Depends(get_task_service)
 ):
     task = await task_service.complete_task(task_id)
     if not task:

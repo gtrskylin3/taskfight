@@ -54,10 +54,17 @@ class TaskRepository:
 
     async def update_task(self, task_id: int, task_data: dict):
         """Update a task"""
+        from datetime import datetime
+        # Handle datetime objects properly
+        if 'timer_started_at' in task_data and task_data['timer_started_at']:
+            # Convert to timezone-aware datetime if needed
+            if task_data['timer_started_at'].tzinfo is None:
+                task_data['timer_started_at'] = task_data['timer_started_at'].replace(tzinfo=None)
+
         stmt = update(Task).where(Task.id == task_id).values(**task_data)
         await self.db_session.execute(stmt)
         await self.db_session.commit()
-        
+
         # Return updated task
         return await self.get_task(task_id)
 

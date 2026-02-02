@@ -59,7 +59,8 @@ class TaskService:
 
     async def start_timer(self, task_id: int) -> Optional[TaskResponse]:
         """Start the timer for a task"""
-        task_data = {"is_active": True}
+        from datetime import datetime
+        task_data = {"is_active": True, "timer_started_at": datetime.now()}
         db_task = await self.task_repository.update_task(task_id, task_data)
         if db_task:
             return TaskResponse.from_orm(db_task)
@@ -73,11 +74,18 @@ class TaskService:
             return TaskResponse.from_orm(db_task)
         return None
 
-    async def stop_timer(self, task_id: int) -> Optional[TaskResponse]:
+    async def stop_timer(self, task_id: int, time_elapsed: int = 0) -> Optional[TaskResponse]:
         """Stop the timer for a task and record progress"""
-        # For now, just update the active status
-        # In a real implementation, we would calculate the time spent
-        task_data = {"is_active": False}
+        # Get the current task to access current time_spent
+        current_task = await self.task_repository.get_task(task_id)
+        if not current_task:
+            return None
+
+        # Update the task with new time spent and inactive status
+        task_data = {
+            "is_active": False,
+            "time_spent": current_task.time_spent + time_elapsed
+        }
         db_task = await self.task_repository.update_task(task_id, task_data)
         if db_task:
             return TaskResponse.from_orm(db_task)
@@ -85,7 +93,17 @@ class TaskService:
 
     async def complete_task(self, task_id: int) -> Optional[TaskResponse]:
         """Complete a task"""
-        task_data = {"is_completed": True, "is_active": False}
+        # Get the current task to access current time_spent
+        current_task = await self.task_repository.get_task(task_id)
+        if not current_task:
+            return None
+
+        # Update the task with new time spent, completed status, and inactive status
+        task_data = {
+            "is_completed": True,
+            "is_active": False,
+            "time_spent": current_task.timer
+        }
         db_task = await self.task_repository.update_task(task_id, task_data)
         if db_task:
             return TaskResponse.from_orm(db_task)

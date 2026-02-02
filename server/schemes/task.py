@@ -24,6 +24,10 @@ class TaskUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 
+class TimerUpdate(BaseModel):
+    time_elapsed: int = 0  # время в минутах, которое прошло с начала таймера (по умолчанию 0)
+
+
 class TaskResponse(TaskBase):
     id: int
     created_at: datetime
@@ -31,6 +35,7 @@ class TaskResponse(TaskBase):
     time_spent: int = 0
     is_completed: bool = False
     is_active: bool = False
+    timer_started_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

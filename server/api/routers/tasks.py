@@ -132,9 +132,11 @@ async def stop_timer(
 @router.post("/{task_id}/complete", response_model=TaskResponse)
 async def complete_task(
     task_id: int,
+    timer_update: TimerUpdate,
     task_service: TaskService = Depends(get_task_service)
 ):
-    task = await task_service.complete_task(task_id)
+    time_elapsed = timer_update.time_elapsed if timer_update else 0
+    task = await task_service.complete_task(task_id, time_elapsed)
     if not task:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Task not found"

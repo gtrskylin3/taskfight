@@ -91,7 +91,7 @@ class TaskService:
             return TaskResponse.from_orm(db_task)
         return None
 
-    async def complete_task(self, task_id: int) -> Optional[TaskResponse]:
+    async def complete_task(self, task_id: int, time_elapsed: int) -> Optional[TaskResponse]:
         """Complete a task"""
         # Get the current task to access current time_spent
         current_task = await self.task_repository.get_task(task_id)
@@ -102,7 +102,7 @@ class TaskService:
         task_data = {
             "is_completed": True,
             "is_active": False,
-            "time_spent": current_task.timer
+            "time_spent": current_task.time_spent + time_elapsed
         }
         db_task = await self.task_repository.update_task(task_id, task_data)
         if db_task:

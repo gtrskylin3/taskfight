@@ -5,31 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Timer - TaskFight</title>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="/src/main.js" type="module"></script>
     <link rel="stylesheet" href="/src/style.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Quantico:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+    </style>
 </head>
 <body class="bg-black text-white min-h-screen flex flex-col">
     <div x-data="timerApp()" class="flex-grow flex flex-col items-center justify-center">
         <!-- Back button -->
-        <div class="absolute top-4 left-4">
-            <a href="/" class="btn-secondary">← Back to Tasks</a>
+        <div class="absolute top-6 left-6">
+            <a href="/" class="btn-secondary flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Tasks
+            </a>
         </div>
-        
+
         <!-- Current task info -->
-        <div class="text-center mb-8">
-            <h2 x-text="currentTask?.name || 'Loading...'" class="text-2xl font-bold mb-2"></h2>
-            <div class="flex items-center justify-center space-x-4">
-                <span class="px-2 py-1 rounded text-sm" 
+        <div class="text-center mb-10 max-w-2xl w-full px-4">
+            <h2 x-text="currentTask?.name || 'Loading...'" class="text-2xl md:text-3xl font-bold mb-4 text-[#f0f0f0] press-start-font"></h2>
+            <div class="flex flex-wrap items-center justify-center gap-3">
+                <span class="priority-badge"
                       :class="{
-                          'bg-green-500': currentTask?.priority === 'low',
-                          'bg-yellow-500': currentTask?.priority === 'medium', 
-                          'bg-red-500': currentTask?.priority === 'high'
-                      }" 
+                          'priority-low': currentTask?.priority === 'low',
+                          'priority-medium': currentTask?.priority === 'medium',
+                          'priority-high': currentTask?.priority === 'high'
+                      }"
                       x-text="currentTask?.priority"></span>
-                <span class="bg-indigo-500 px-2 py-1 rounded text-sm" x-text="currentTask?.tag"></span>
+                <span class="tag-badge" x-text="currentTask?.tag"></span>
             </div>
         </div>
-        
+
         <!-- Timer Display -->
         <div class="timer-display" x-text="
             remainingSeconds >= 3600 ?
@@ -39,10 +47,10 @@
                 Math.floor((remainingSeconds % 3600) / 60) + ':' +
                 (remainingSeconds % 60).toString().padStart(2, '0')
         "></div>
-        
+
         <!-- Progress Bar -->
-        <div class="w-4/5 max-w-lg mb-10">
-            <div class="flex justify-between text-sm mb-1">
+        <div class="w-4/5 max-w-2xl mb-12">
+            <div class="flex justify-between text-sm mb-2">
                 <span x-text="`${Math.round(progressPercentage)}% Complete`"></span>
                 <span x-text="`${timeSpentMinutes}/${currentTask?.timer || 0} min`"></span>
             </div>
@@ -50,12 +58,35 @@
                 <div class="progress-bar-fill" :style="`width: ${progressPercentage}%`"></div>
             </div>
         </div>
-        
+
         <!-- Timer Controls -->
-        <div class="timer-controls">
-            <button @click="toggleTimer" :disabled="!currentTask" class="btn-primary px-6 py-3" x-text="isRunning ? 'Pause' : 'Resume'"></button>
-            <button @click="stopTimer" :disabled="!currentTask" class="btn-secondary px-6 py-3">Stop</button>
-            <button @click="completeTask" :disabled="!currentTask" class="btn-primary px-6 py-3">Complete</button>
+        <div class="timer-controls flex flex-wrap justify-center gap-4">
+            <button @click="toggleTimer" :disabled="!currentTask" class="btn-primary px-8 py-4 text-lg flex items-center" x-text="isRunning ? 'Pause' : 'Resume'">
+                <template x-if="isRunning">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </template>
+                <template x-if="!isRunning">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </template>
+            </button>
+            <button @click="stopTimer" :disabled="!currentTask" class="btn-secondary px-8 py-4 text-lg flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                </svg>
+                Stop
+            </button>
+            <button @click="completeTask" :disabled="!currentTask" class="btn-primary px-8 py-4 text-lg flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Complete
+            </button>
         </div>
     </div>
 
@@ -67,14 +98,14 @@
                 remainingSeconds: 0,
                 isRunning: false,
                 timerInterval: null,
-                
+
                 get progressPercentage() {
                     if (!this.currentTask || this.currentTask.timer <= 0) return 0;
                     const totalTimeSeconds = this.currentTask.timer * 60;
                     const elapsedSeconds = totalTimeSeconds - this.remainingSeconds;
                     return (elapsedSeconds / totalTimeSeconds) * 100;
                 },
-                
+
                 get timeSpentMinutes() {
                     if (!this.currentTask) return 0;
                     const totalTimeSeconds = this.currentTask.timer * 60;
@@ -82,43 +113,15 @@
                     return Math.round(elapsedSeconds / 60);
                 },
 
-                formatTime(secondsOrMinutes) {
-                    // Check if input is in seconds (larger values) or minutes (smaller values)
-                    let totalMinutes;
-                    if (secondsOrMinutes >= 3600) { // Likely seconds (more than 60 minutes in seconds)
-                        totalMinutes = Math.floor(secondsOrMinutes / 60);
-                    } else {
-                        // Input is already in minutes
-                        totalMinutes = secondsOrMinutes;
-                    }
-
-                    if (totalMinutes < 60) {
-                        return `${totalMinutes} min`;
-                    } else {
-                        const hours = Math.floor(totalMinutes / 60);
-                        const minutes = totalMinutes % 60;
-                        if (minutes > 0) {
-                            return `${hours}h ${minutes}m`;
-                        } else {
-                            return `${hours}h`;
-                        }
-                    }
-                },
-
                 async init() {
                     // Get task ID from URL
                     const urlParams = new URLSearchParams(window.location.search);
                     this.taskId = parseInt(urlParams.get('taskId'));
 
-                    console.log('Initializing timer for taskId:', this.taskId);
-
                     if (this.taskId) {
                         await this.loadTask();
                         this.remainingSeconds = (this.currentTask.timer - this.currentTask.time_spent) * 60;
-                        this.initialRemainingSeconds = this.remainingSeconds; // Сохраняем начальное значение
-
-                        console.log('Loaded task:', this.currentTask);
-                        console.log('Calculated remainingSeconds:', this.remainingSeconds);
+                        this.initialRemainingSeconds = this.remainingSeconds;
 
                         // Start the timer if it was previously running
                         if (this.currentTask.is_active) {
@@ -126,32 +129,28 @@
                         }
                     }
                 },
-                
+
                 async loadTask() {
                     try {
-                        console.log('Loading task with ID:', this.taskId);
                         const response = await fetch(`http://localhost:8000/tasks/${this.taskId}`);
                         this.currentTask = await response.json();
-                        console.log('Task loaded successfully:', this.currentTask);
                     } catch (error) {
                         console.error('Error loading task:', error);
                     }
                 },
-                
+
                 formatTime(seconds) {
                     const mins = Math.floor(seconds / 60);
                     const secs = seconds % 60;
                     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
                 },
-                
+
                 startTimer() {
                     if (this.timerInterval) clearInterval(this.timerInterval);
 
                     this.isRunning = true;
-                    this.startTime = Date.now(); // Запоминаем время начала
-                    console.log('Starting timer, initial remainingSeconds:', this.remainingSeconds);
+                    this.startTime = Date.now();
 
-                    // Используем более частый интервал для обновления UI
                     this.timerInterval = setInterval(() => {
                         // Обновляем remainingSeconds на основе прошедшего времени
                         const elapsedTime = Math.floor((Date.now() - this.startTime) / 1000);
@@ -160,22 +159,16 @@
                         // Обновляем только если значение изменилось
                         if (this.remainingSeconds !== newRemaining) {
                             this.remainingSeconds = newRemaining;
-
-                            // Log every 10 seconds to see timer progression
-                            if (this.remainingSeconds % 10 === 0) {
-                                console.log('Timer tick, remainingSeconds:', this.remainingSeconds);
-                            }
                         }
 
                         if (this.remainingSeconds <= 0) {
                             this.endTimer();
                         }
-                    }, 1000); // Обновляем каждую секунду для UI
+                    }, 1000);
                 },
 
                 pauseTimer() {
                     this.isRunning = false;
-                    console.log('Pausing timer, remainingSeconds:', this.remainingSeconds);
                     if (this.timerInterval) {
                         clearInterval(this.timerInterval);
                         this.timerInterval = null;
@@ -187,7 +180,7 @@
                         }
                     }
                 },
-                
+
                 toggleTimer() {
                     if (this.isRunning) {
                         this.pauseTimer();
@@ -197,14 +190,14 @@
                         this.sendResumeRequest();
                     }
                 },
-                
+
                 endTimer() {
                     this.pauseTimer();
                     alert('Timer completed!');
                     // Optionally navigate back to tasks
                     window.location.href = '/';
                 },
-                
+
                 async sendPauseRequest() {
                     try {
                         await fetch(`http://localhost:8000/tasks/${this.taskId}/pause-timer`, {
@@ -239,13 +232,6 @@
                         timeElapsed = Math.floor((this.currentTask.timer * 60 - this.remainingSeconds) / 60);
                     }
 
-                    // Log for debugging
-                    console.log('Stop Timer Debug:');
-                    console.log('  currentTask.timer:', this.currentTask.timer);
-                    console.log('  remainingSeconds:', this.remainingSeconds);
-                    console.log('  startTime:', this.startTime);
-                    console.log('  calculated timeElapsed:', timeElapsed);
-
                     try {
                         const response = await fetch(`http://localhost:8000/tasks/${this.taskId}/stop-timer`, {
                             method: 'POST',
@@ -270,12 +256,6 @@
 
                     // Calculate time elapsed in minutes
                     const timeElapsed = Math.floor((this.currentTask.timer * 60 - this.remainingSeconds) / 60);
-
-                    // Log for debugging
-                    console.log('Complete Task Debug:');
-                    console.log('  currentTask.timer:', this.currentTask.timer);
-                    console.log('  remainingSeconds:', this.remainingSeconds);
-                    console.log('  calculated timeElapsed:', timeElapsed);
 
                     try {
                         const response = await fetch(`http://localhost:8000/tasks/${this.taskId}/complete`,  {

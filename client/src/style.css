@@ -1,47 +1,183 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Quantico:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+@theme {
+  --color-primary: #f0f0f0;
+  --color-primary-foreground: #000;
+  --color-secondary: #333;
+  --color-secondary-foreground: #fff;
+  --color-accent: #6366f1;
+  --color-accent-foreground: #fff;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #fff;
+  --color-muted: #1a1a1a;
+  --color-muted-foreground: #9ca3af;
+  --color-background: #000;
+  --color-foreground: #f0f0f0;
+  --color-border: #262626;
+  --color-input: #262626;
+  --color-ring: #6366f1;
+  --radius: 0.5rem;
+}
 
 body {
-  font-family: 'Inter', sans-serif;
-  background-color: #0f172a;
-  color: #e2e8f0;
+  font-family: "Quantico", sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Use Press Start 2P for specific elements */
+.press-start-font {
+  font-family: "Press Start 2P", system-ui;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: normal;
+}
+
+/* Use Quantico for all elements */
+.quantico-regular {
+  font-family: "Quantico", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.quantico-bold {
+  font-family: "Quantico", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.quantico-regular-italic {
+  font-family: "Quantico", sans-serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.quantico-bold-italic {
+  font-family: "Quantico", sans-serif;
+  font-weight: 700;
+  font-style: italic;
+}
+
+/* Modern minimalist card */
 .task-card {
-  @apply bg-slate-800 rounded-lg p-4 mb-3 shadow transition-all duration-200 hover:bg-slate-700 border border-slate-700;
+  @apply bg-[#0a0a0a] rounded-xl p-5 mb-4 shadow-lg transition-all duration-300 hover:bg-[#111] border border-[#222] backdrop-blur-sm;
 }
 
+/* Modern progress bar */
 .progress-bar {
-  @apply w-full bg-slate-700 rounded-full h-2.5;
+  @apply w-full bg-[#1a1a1a] rounded-full h-2 overflow-hidden;
 }
 
 .progress-bar-fill {
-  @apply bg-indigo-600 h-2.5 rounded-full;
+  @apply h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300 ease-out;
 }
 
+/* Modern buttons */
 .btn-primary {
-  @apply bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded transition-colors;
+  @apply bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-indigo-500/20;
 }
 
 .btn-secondary {
-  @apply bg-slate-600 hover:bg-slate-700 text-white font-medium py-2 px-4 rounded transition-colors;
+  @apply bg-[#1a1a1a] hover:bg-[#222] text-[#f0f0f0] font-medium py-3 px-6 rounded-lg transition-all duration-300 border border-[#333] shadow-sm;
 }
 
 .btn-danger {
-  @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded transition-colors;
+  @apply bg-red-900/50 hover:bg-red-800/50 text-red-400 font-medium py-3 px-6 rounded-lg transition-all duration-300 border border-red-900/50 shadow-sm;
 }
 
+/* Timer display with modern styling */
 .timer-display {
-  @apply text-6xl md:text-8xl font-mono text-center my-10 text-white;
+  @apply text-6xl md:text-8xl text-center my-10 text-white font-light tracking-wider;
 }
 
 .timer-controls {
-  @apply flex justify-center space-x-4 mt-10;
+  @apply flex flex-wrap justify-center gap-4 mt-10;
 }
 
 .nav-link {
-  @apply px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-700 transition-colors;
+  @apply px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1a1a1a] transition-colors duration-200 relative;
+}
+
+.nav-link::after {
+  @apply content-[''] absolute bottom-0 left-1/2 w-0 h-0.5 bg-indigo-500 transition-all duration-300 -translate-x-1/2;
+}
+
+.nav-link:hover::after {
+  @apply w-3/4;
 }
 
 .active-nav-link {
-  @apply bg-slate-700 text-white;
+  @apply bg-[#1a1a1a] text-[#f0f0f0];
+}
+
+/* Modal styling */
+.modal-overlay {
+  @apply fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4;
+}
+
+.modal-content {
+  @apply bg-[#0a0a0a] rounded-2xl p-6 w-full max-w-md border border-[#222] shadow-2xl;
+}
+
+/* Input fields */
+.input-field {
+  @apply w-full bg-[#0f0f0f] border border-[#222] rounded-lg px-4 py-3 text-[#f0f0f0] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all;
+}
+
+/* Priority badges */
+.priority-badge {
+  @apply px-3 py-1 rounded-full text-xs font-medium;
+}
+
+.priority-low {
+  @apply bg-emerald-900/30 text-emerald-400 border border-emerald-900/50;
+}
+
+.priority-medium {
+  @apply bg-amber-900/30 text-amber-400 border border-amber-900/50;
+}
+
+.priority-high {
+  @apply bg-rose-900/30 text-rose-400 border border-rose-900/50;
+}
+
+/* Tag badges */
+.tag-badge {
+  @apply bg-indigo-900/30 text-indigo-300 px-3 py-1 rounded-full text-xs font-medium border border-indigo-900/50;
+}
+
+/* Stats cards */
+.stats-card {
+  @apply bg-[#0a0a0a] rounded-2xl p-6 border border-[#222] backdrop-blur-sm;
+}
+
+/* Filter buttons */
+.filter-btn {
+  @apply px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 border border-[#222] hover:bg-[#1a1a1a];
+}
+
+.filter-btn.active {
+  @apply bg-indigo-900/30 text-indigo-300 border-indigo-700/50;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-[#0a0a0a];
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-[#222] rounded-full hover:bg-[#333];
+}
+
+/* Focus ring for accessibility */
+.focus\:ring-2:focus {
+  @apply ring-2 ring-indigo-500 ring-offset-2 ring-offset-[#0a0a0a];
 }

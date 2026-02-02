@@ -104,7 +104,7 @@
                             <div x-show="task.time_spent > 0" class="mt-3">
                                 <div class="flex justify-between text-xs mb-1">
                                     <span x-text="`${Math.round((task.time_spent / task.timer) * 100)}% Complete`"></span>
-                                    <span x-text="`${task.time_spent}/${task.timer} min`"></span>
+                                    <span x-text="`${formatTime(task.time_spent)}/${formatTime(task.timer)}`"></span>
                                 </div>
                                 <div class="progress-bar">
                                     <div class="progress-bar-fill" :style="`width: ${Math.min(100, (task.time_spent / task.timer) * 100)}%`"></div>
@@ -136,7 +136,7 @@
                                             <div class="progress-bar-fill" :style="`width: ${Math.min(100, (time / maxTimeByTag) * 100)}%`"></div>
                                         </div>
                                     </div>
-                                    <div class="w-16 text-right text-sm" x-text="`${time} min`"></div>
+                                    <div class="w-16 text-right text-sm" x-text="formatTime(time)"></div>
                                 </div>
                             </template>
                         </div>
@@ -214,7 +214,21 @@
                 get maxTimeByTag() {
                     return Math.max(...Object.values(this.timeByTag), 1);
                 },
-                
+
+                formatTime(minutes) {
+                    if (minutes < 60) {
+                        return `${minutes} min`;
+                    } else {
+                        const hours = Math.floor(minutes / 60);
+                        const remainingMinutes = minutes % 60;
+                        if (remainingMinutes > 0) {
+                            return `${hours}h ${remainingMinutes}m`;
+                        } else {
+                            return `${hours}h`;
+                        }
+                    }
+                },
+
                 async init() {
                     await this.loadTasks();
                     await this.loadStats();

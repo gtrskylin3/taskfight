@@ -219,14 +219,15 @@
                     if (this.timerInterval) clearInterval(this.timerInterval);
 
                     this.isRunning = true;
-                    this.startTime = Date.now();
+                    // Calculate the starting time based on remaining seconds
+                    this.startTime = Date.now() - ((this.initialRemainingSeconds - this.remainingSeconds) * 1000);
 
                     this.timerInterval = setInterval(() => {
-                        // Обновляем remainingSeconds на основе прошедшего времени
+                        // Calculate remaining time based on elapsed time since start
                         const elapsedTime = Math.floor((Date.now() - this.startTime) / 1000);
                         const newRemaining = Math.max(0, this.initialRemainingSeconds - elapsedTime);
 
-                        // Обновляем только если значение изменилось
+                        // Update only if value changed
                         if (this.remainingSeconds !== newRemaining) {
                             this.remainingSeconds = newRemaining;
                         }
@@ -243,11 +244,9 @@
                         clearInterval(this.timerInterval);
                         this.timerInterval = null;
 
-                        // Обновляем remainingSeconds на основе прошедшего времени
-                        if (this.startTime) {
-                            const elapsedTime = Math.floor((Date.now() - this.startTime) / 1000);
-                            this.remainingSeconds = Math.max(0, this.initialRemainingSeconds - elapsedTime);
-                        }
+                        // Update remainingSeconds based on elapsed time
+                        const elapsedTime = Math.floor((Date.now() - this.startTime) / 1000);
+                        this.remainingSeconds = Math.max(0, this.initialRemainingSeconds - elapsedTime);
                     }
                 },
 

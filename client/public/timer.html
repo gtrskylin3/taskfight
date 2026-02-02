@@ -193,9 +193,30 @@
 
                 endTimer() {
                     this.pauseTimer();
-                    alert('Timer completed!');
-                    // Optionally navigate back to tasks
-                    window.location.href = '/';
+
+                    // Calculate time elapsed in minutes
+                    const timeElapsed = Math.floor((this.currentTask.timer * 60 - this.remainingSeconds) / 60);
+
+                    // Send complete request to backend
+                    fetch(`http://localhost:8000/tasks/${this.taskId}/complete`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ time_elapsed: timeElapsed })
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Timer completed and task marked as complete!');
+                            window.location.href = '/';
+                        } else {
+                            alert('Timer completed but there was an issue marking the task as complete.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error completing task:', error);
+                        alert('Timer completed but there was an error communicating with the server.');
+                    });
                 },
 
                 async sendPauseRequest() {

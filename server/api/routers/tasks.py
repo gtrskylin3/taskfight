@@ -22,11 +22,17 @@ async def create_task(
 ):
     return await task_service.create_task(task)
 
+@router.get("/active", response_model=List[TaskResponse])
+async def get_active_tasks(
+    skip: int = 0,
+    limit: int = 100,
+    task_service: TaskService = Depends(get_task_service),
+):
+    """Get active (non-completed) tasks"""
+    return await task_service.get_active_tasks(skip=skip, limit=limit)
 
 @router.get("/{task_id}", response_model=TaskResponse)
-async def get_task(
-    task_id: int, task_service: TaskService = Depends(get_task_service)
-):
+async def get_task(task_id: int, task_service: TaskService = Depends(get_task_service)):
     task = await task_service.get_task(task_id)
     if not task:
         raise HTTPException(
@@ -58,6 +64,8 @@ async def update_task(
     return updated_task
 
 
+
+
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_task(
     task_id: int, task_service: TaskService = Depends(get_task_service)
@@ -78,9 +86,7 @@ async def get_tasks_by_tag(
 
 
 @router.get("/in-progress", response_model=List[TaskResponse])
-async def get_in_progress_tasks(
-    task_service: TaskService = Depends(get_task_service)
-):
+async def get_in_progress_tasks(task_service: TaskService = Depends(get_task_service)):
     return await task_service.get_in_progress_tasks()
 
 

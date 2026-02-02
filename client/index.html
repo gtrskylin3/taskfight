@@ -222,7 +222,7 @@
                 
                 async loadTasks() {
                     try {
-                        const response = await fetch('http://localhost:8000/tasks');
+                        const response = await fetch('http://localhost:8000/tasks/active');
                         this.tasks = await response.json();
                     } catch (error) {
                         console.error('Error loading tasks:', error);

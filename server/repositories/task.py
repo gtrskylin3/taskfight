@@ -26,6 +26,13 @@ class TaskRepository:
         result = await self.db_session.execute(select(Task).offset(skip).limit(limit))
         return result.scalars().all()
 
+    async def get_active_tasks(self, skip: int = 0, limit: int = 100):
+        """Get active (non-completed) tasks with pagination"""
+        result = await self.db_session.execute(
+            select(Task).filter(Task.is_completed == False).offset(skip).limit(limit)
+        )
+        return result.scalars().all()
+
     async def get_tasks_by_date(self, date: str):
         """Get tasks created on a specific date"""
         result = await self.db_session.execute(

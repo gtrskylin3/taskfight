@@ -25,6 +25,11 @@ class TaskService:
         db_tasks = await self.task_repository.get_tasks(skip, limit)
         return [TaskResponse.from_orm(task) for task in db_tasks]
 
+    async def get_active_tasks(self, skip: int = 0, limit: int = 100) -> List[TaskResponse]:
+        """Get active (non-completed) tasks with pagination"""
+        db_tasks = await self.task_repository.get_active_tasks(skip, limit)
+        return [TaskResponse.from_orm(task) for task in db_tasks]
+
     async def get_tasks_by_date(self, date: str) -> List[TaskResponse]:
         """Get tasks created on a specific date"""
         db_tasks = await self.task_repository.get_tasks_by_date(date)

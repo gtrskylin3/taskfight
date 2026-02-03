@@ -263,12 +263,10 @@
                 endTimer() {
                     this.pauseTimer();
 
-                    // Calculate time elapsed to add to existing time_spent
-                    // time_elapsed = (total_initial_time - current_remaining_time) - already_spent_time
-                    const totalTimeInitial = this.currentTask.timer;
-                    const currentTimeSpent = totalTimeInitial - Math.ceil(this.remainingSeconds / 60);
-                    const timeAlreadySpent = this.currentTask.time_spent || 0;
-                    let timeElapsed = currentTimeSpent - timeAlreadySpent;
+                    // Calculate elapsed time in the current session and convert to minutes.
+                    // This is more accurate than the previous implementation.
+                    const sessionElapsedSeconds = this.initialRemainingSeconds - this.remainingSeconds;
+                    let timeElapsed = Math.round(sessionElapsedSeconds / 60);
 
                     // Ensure timeElapsed is not negative
                     timeElapsed = Math.max(0, timeElapsed);
@@ -322,12 +320,10 @@
                 async stopTimer() {
                     this.pauseTimer();
 
-                    // Calculate time elapsed to add to existing time_spent
-                    // time_elapsed = (total_initial_time - current_remaining_time) - already_spent_time
-                    const totalTimeInitial = this.currentTask.timer;
-                    const currentTimeSpent = totalTimeInitial - Math.ceil(this.remainingSeconds / 60);
-                    const timeAlreadySpent = this.currentTask.time_spent || 0;
-                    let timeElapsed = currentTimeSpent - timeAlreadySpent;
+                    // Calculate elapsed time in the current session and convert to minutes.
+                    // This is more accurate than the previous implementation.
+                    const sessionElapsedSeconds = this.initialRemainingSeconds - this.remainingSeconds;
+                    let timeElapsed = Math.round(sessionElapsedSeconds / 60);
 
                     // Ensure timeElapsed is not negative
                     timeElapsed = Math.max(0, timeElapsed);
@@ -354,12 +350,10 @@
 
                     this.pauseTimer();
 
-                    // Calculate time elapsed to add to existing time_spent
-                    // time_elapsed = (total_initial_time - current_remaining_time) - already_spent_time
-                    const totalTimeInitial = this.currentTask.timer;
-                    const currentTimeSpent = totalTimeInitial - Math.ceil(this.remainingSeconds / 60);
-                    const timeAlreadySpent = this.currentTask.time_spent || 0;
-                    let timeElapsed = currentTimeSpent - timeAlreadySpent;
+                    // Calculate elapsed time in the current session and convert to minutes.
+                    // This is more accurate than the previous implementation.
+                    const sessionElapsedSeconds = this.initialRemainingSeconds - this.remainingSeconds;
+                    let timeElapsed = Math.round(sessionElapsedSeconds / 60);
 
                     // Ensure timeElapsed is not negative
                     timeElapsed = Math.max(0, timeElapsed);

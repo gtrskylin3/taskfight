@@ -263,8 +263,15 @@
                 endTimer() {
                     this.pauseTimer();
 
-                    // Calculate time elapsed in minutes
-                    const timeElapsed = Math.floor((this.currentTask.timer * 60 - this.remainingSeconds) / 60);
+                    // Calculate time elapsed to add to existing time_spent
+                    // time_elapsed = (total_initial_time - current_remaining_time) - already_spent_time
+                    const totalTimeInitial = this.currentTask.timer;
+                    const currentTimeSpent = totalTimeInitial - Math.ceil(this.remainingSeconds / 60);
+                    const timeAlreadySpent = this.currentTask.time_spent || 0;
+                    let timeElapsed = currentTimeSpent - timeAlreadySpent;
+
+                    // Ensure timeElapsed is not negative
+                    timeElapsed = Math.max(0, timeElapsed);
 
                     // Play notification sound
                     this.notificationAudio.currentTime = 0;
@@ -315,16 +322,15 @@
                 async stopTimer() {
                     this.pauseTimer();
 
-                    // Calculate actual time elapsed based on start time
-                    let timeElapsed;
-                    if (this.startTime) {
-                        // Calculate based on actual elapsed time since start
-                        const actualElapsedTime = Math.floor((Date.now() - this.startTime) / 1000 / 60); // in minutes
-                        timeElapsed = Math.max(0, actualElapsedTime);
-                    } else {
-                        // Fallback to previous calculation
-                        timeElapsed = Math.floor((this.currentTask.timer * 60 - this.remainingSeconds) / 60);
-                    }
+                    // Calculate time elapsed to add to existing time_spent
+                    // time_elapsed = (total_initial_time - current_remaining_time) - already_spent_time
+                    const totalTimeInitial = this.currentTask.timer;
+                    const currentTimeSpent = totalTimeInitial - Math.ceil(this.remainingSeconds / 60);
+                    const timeAlreadySpent = this.currentTask.time_spent || 0;
+                    let timeElapsed = currentTimeSpent - timeAlreadySpent;
+
+                    // Ensure timeElapsed is not negative
+                    timeElapsed = Math.max(0, timeElapsed);
 
                     try {
                         const response = await fetch(`http://localhost:8000/tasks/${this.taskId}/stop-timer`, {
@@ -348,8 +354,15 @@
 
                     this.pauseTimer();
 
-                    // Calculate time elapsed in minutes
-                    const timeElapsed = Math.floor((this.currentTask.timer * 60 - this.remainingSeconds) / 60);
+                    // Calculate time elapsed to add to existing time_spent
+                    // time_elapsed = (total_initial_time - current_remaining_time) - already_spent_time
+                    const totalTimeInitial = this.currentTask.timer;
+                    const currentTimeSpent = totalTimeInitial - Math.ceil(this.remainingSeconds / 60);
+                    const timeAlreadySpent = this.currentTask.time_spent || 0;
+                    let timeElapsed = currentTimeSpent - timeAlreadySpent;
+
+                    // Ensure timeElapsed is not negative
+                    timeElapsed = Math.max(0, timeElapsed);
 
                     // Play notification sound
                     this.notificationAudio.currentTime = 0;

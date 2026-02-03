@@ -99,10 +99,14 @@ class TaskService:
             return None
 
         # Update the task with new time spent, completed status, and inactive status
+        if current_task.time_spent + time_elapsed <= current_task.timer:
+            time_spent = current_task.time_spent + time_elapsed
+        else:
+            time_spent = current_task.timer
         task_data = {
             "is_completed": True,
             "is_active": False,
-            "time_spent": current_task.time_spent + time_elapsed
+            "time_spent": time_spent
         }
         db_task = await self.task_repository.update_task(task_id, task_data)
         if db_task:

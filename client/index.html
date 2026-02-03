@@ -96,7 +96,21 @@
                             </div>
                             <div class="mb-6">
                                 <label class="block text-sm font-medium mb-2">Tag</label>
-                                <input type="text" x-model="newTask.tag" class="input-field w-full" placeholder="e.g. Work, Personal, Study" required>
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        x-model="newTask.tag"
+                                        class="input-field w-full"
+                                        placeholder="e.g. Work, Personal, Study"
+                                        required
+                                        list="existing-tags"
+                                    >
+                                    <datalist id="existing-tags">
+                                        <template x-for="tag in uniqueTags" :key="tag">
+                                            <option :value="tag"></option>
+                                        </template>
+                                    </datalist>
+                                </div>
                             </div>
                             <div class="flex justify-end space-x-3">
                                 <button type="button" @click="openTaskModal = false" class="btn-secondary">Cancel</button>
@@ -353,7 +367,7 @@
                 },
 
                 get uniqueTags() {
-                    return [...new Set(this.tasks.map(t => t.tag))];
+                    return [...new Set(this.tasks.map(t => t.tag))].filter(tag => tag && tag.trim() !== '');
                 },
 
                 get filteredTasks() {

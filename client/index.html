@@ -120,6 +120,62 @@
                     </div>
                 </div>
 
+                <!-- Task Update Modal -->
+                <div x-show="openUpdateModalFlag" class="modal-overlay" x-cloak>
+                    <div class="modal-content">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold press-start-font">Update Task</h3>
+                            <button @click="closeUpdateModal" class="text-[#9ca3af] hover:text-[#f0f0f0]">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <form @submit.prevent="updateTask">
+                            <div class="mb-5">
+                                <label class="block text-sm font-medium mb-2">Task Name</label>
+                                <input type="text" x-model="editingTask.name" class="input-field w-full" placeholder="What do you need to accomplish?" required>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Priority</label>
+                                    <select x-model="editingTask.priority" class="input-field w-full">
+                                        <option value="low">Low</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="high">High</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Timer (minutes)</label>
+                                    <input type="number" x-model.number="editingTask.timer" class="input-field w-full" min="1" required>
+                                </div>
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium mb-2">Tag</label>
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        x-model="editingTask.tag"
+                                        class="input-field w-full"
+                                        placeholder="e.g. Work, Personal, Study"
+                                        required
+                                        list="existing-tags-update"
+                                    >
+                                    <datalist id="existing-tags-update">
+                                        <template x-for="tag in uniqueTags" :key="tag">
+                                            <option :value="tag"></option>
+                                        </template>
+                                    </datalist>
+                                </div>
+                            </div>
+                            <div class="flex justify-end space-x-3">
+                                <button type="button" @click="closeUpdateModal" class="btn-secondary">Cancel</button>
+                                <button type="submit" class="btn-primary">Update Task</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
                 <!-- Filters -->
                 <div class="flex flex-wrap gap-3 items-center">
                     <div class="flex flex-wrap gap-2">
@@ -165,7 +221,7 @@
                                     </div>
 
                                     <!-- Progress Bar -->
-                                    <div x-show="task.time_spent > 0" class="mt-4">
+                                    <div class="mt-4">
                                         <div class="flex justify-between text-xs mb-1">
                                             <span x-text="`${Math.round((task.time_spent / task.timer) * 100)}% Complete`"></span>
                                             <span x-text="`${formatTime(task.time_spent)}/${formatTime(task.timer)}`"></span>
@@ -180,11 +236,15 @@
                                     <button @click="startTimer(task)" class="btn-primary text-sm px-4 py-2 min-w-[80px]">
                                         <span x-text="task.time_spent > 0 ? 'Resume' : 'Start'"></span>
                                     </button>
+                                    <button @click="openUpdateModal(task)" class="btn-secondary text-sm px-4 py-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
                                     <button @click="deleteTask(task.id)" class="btn-danger text-sm px-4 py-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
-                                        Delete
                                     </button>
                                 </div>
                             </div>
@@ -344,6 +404,14 @@
                 },
                 activeFilter: 'all',
                 selectedTag: '',
+                openUpdateModalFlag: false,
+                editingTask: {
+                    id: null,
+                    name: '',
+                    priority: 'medium',
+                    tag: '',
+                    timer: 25
+                },
 
                 // Stats
                 timeByTag: {},
@@ -497,6 +565,54 @@
                         }
                     } catch (error) {
                         console.error('Error starting timer:', error);
+                    }
+                },
+
+                openUpdateModal(task) {
+                    this.editingTask = {
+                        id: task.id,
+                        name: task.name,
+                        priority: task.priority,
+                        tag: task.tag,
+                        timer: task.timer
+                    };
+                    this.openUpdateModalFlag = true;
+                },
+
+                closeUpdateModal() {
+                    this.openUpdateModalFlag = false;
+                    this.editingTask = {
+                        id: null,
+                        name: '',
+                        priority: 'medium',
+                        tag: '',
+                        timer: 25
+                    };
+                },
+
+                async updateTask() {
+                    try {
+                        const response = await fetch(`http://localhost:8000/tasks/${this.editingTask.id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                name: this.editingTask.name,
+                                priority: this.editingTask.priority,
+                                tag: this.editingTask.tag,
+                                timer: this.editingTask.timer
+                            })
+                        });
+
+                        if (response.ok) {
+                            const updatedTask = await response.json();
+                            const index = this.tasks.findIndex(t => t.id === this.editingTask.id);
+                            if (index !== -1) {
+                                this.tasks[index] = updatedTask;
+                            }
+                            this.closeUpdateModal();
+                        }
+                    } catch (error) {
+                        console.error('Error updating task:', error);
                     }
                 }
             }

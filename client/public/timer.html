@@ -90,12 +90,12 @@
         <!-- Timer Controls -->
         <div class="timer-controls flex flex-wrap justify-center gap-4">
             <button @click="toggleTimer" :disabled="!currentTask" class="btn-primary px-8 py-4 text-lg flex items-center" x-text="isRunning ? 'Pause' : 'Resume'">
-                <template x-if="isRunning">
+                <template x-if="$data.isRunning">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </template>
-                <template x-if="!isRunning">
+                <template x-if="!$data.isRunning">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -157,10 +157,13 @@
                     // Initialize audio elements
                     this.lofiAudio = document.getElementById('lofi-radio');
                     this.notificationAudio = document.getElementById('notification-sound');
-
+                    
                     // Set initial volume
                     this.lofiAudio.volume = this.lofiVolume;
-
+                    
+                    // Set up error handling for lofi radio
+                    this.lofiAudio.addEventListener('error', this.handleLofiError.bind(this));
+                    
                     // Get task ID from URL
                     const urlParams = new URLSearchParams(window.location.search);
                     this.taskId = parseInt(urlParams.get('taskId'));
@@ -195,9 +198,14 @@
                 toggleLofiRadio() {
                     if (this.isLofiPlaying) {
                         this.lofiAudio.pause();
+                        this.lofiAudio.removeEventListener('error', this.handleLofiError);
                         this.isLofiPlaying = false;
                     } else {
                         this.lofiAudio.volume = this.lofiVolume; // Apply current volume setting
+                        
+                        // Add error listener to handle stream interruptions
+                        this.lofiAudio.addEventListener('error', this.handleLofiError.bind(this));
+                        
                         this.lofiAudio.play()
                             .then(() => {
                                 this.isLofiPlaying = true;
@@ -207,6 +215,20 @@
                                 alert('Could not play lofi radio. Browser may require user interaction to play audio.');
                             });
                     }
+                },
+
+                handleLofiError(event) {
+                    console.warn('Lofi radio error:', event.target.error);
+                    // Attempt to reload and restart the stream
+                    setTimeout(() => {
+                        if (this.isLofiPlaying) {
+                            this.lofiAudio.load();
+                            this.lofiAudio.play().catch(error => {
+                                console.error('Failed to restart lofi radio:', error);
+                                // Optionally notify user that stream needs manual restart
+                            });
+                        }
+                    }, 2000); // Wait 2 seconds before attempting to reconnect
                 },
 
                 updateLofiVolume() {

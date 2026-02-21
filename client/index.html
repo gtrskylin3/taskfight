@@ -271,9 +271,28 @@
 
             <!-- Dashboard View -->
             <div x-show="currentView === 'dashboard'" class="space-y-8">
-                <div>
-                    <h2 class="text-3xl font-bold text-[#f0f0f0] press-start-font">Statistics Dashboard</h2>
-                    <p class="text-[#9ca3af] mt-1">Track your productivity and progress</p>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-3xl font-bold text-[#f0f0f0] press-start-font">Statistics Dashboard</h2>
+                        <p class="text-[#9ca3af] mt-1">Track your productivity and progress</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button @click="selectedPeriod = 'day'" :class="{ 'filter-btn active': selectedPeriod === 'day' }" class="filter-btn text-sm px-3 py-1.5">
+                            Today
+                        </button>
+                        <button @click="selectedPeriod = 'week'" :class="{ 'filter-btn active': selectedPeriod === 'week' }" class="filter-btn text-sm px-3 py-1.5">
+                            Week
+                        </button>
+                        <button @click="selectedPeriod = 'month'" :class="{ 'filter-btn active': selectedPeriod === 'month' }" class="filter-btn text-sm px-3 py-1.5">
+                            Month
+                        </button>
+                        <button @click="selectedPeriod = 'year'" :class="{ 'filter-btn active': selectedPeriod === 'year' }" class="filter-btn text-sm px-3 py-1.5">
+                            Year
+                        </button>
+                        <button @click="selectedPeriod = 'all'" :class="{ 'filter-btn active': selectedPeriod === 'all' }" class="filter-btn text-sm px-3 py-1.5">
+                            All Time
+                        </button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -404,6 +423,7 @@
                 },
                 activeFilter: 'all',
                 selectedTag: '',
+                selectedPeriod: 'all',
                 openUpdateModalFlag: false,
                 editingTask: {
                     id: null,
@@ -417,13 +437,17 @@
                 timeByTag: {},
                 completedTasksByTag: {},
 
+                // Period-based stats
+                totalTimeSpentValue: 0,
+                completedTasksCountValue: 0,
+
                 // Additional computed properties for dashboard
                 get totalTimeSpent() {
-                    return this.tasks.reduce((sum, task) => sum + task.time_spent, 0);
+                    return this.totalTimeSpentValue;
                 },
 
                 get completedTasksCount() {
-                    return this.tasks.filter(task => task.is_completed).length;
+                    return this.completedTasksCountValue;
                 },
 
                 get activeTasksCount() {
@@ -486,6 +510,11 @@
                 async init() {
                     await this.loadTasks();
                     await this.loadStats();
+                    
+                    // Watch for period changes and reload stats
+                    this.$watch('selectedPeriod', () => {
+                        this.loadStats();
+                    });
                 },
 
                 async loadTasks() {
@@ -500,13 +529,21 @@
 
                 async loadStats() {
                     try {
-                        // Load time by tag
-                        const timeResponse = await fetch('http://localhost:8000/statistics/time-by-tag');
+                        // Load time by tag with selected period
+                        const timeResponse = await fetch(`http://localhost:8000/statistics/time-by-tag?period=${this.selectedPeriod}`);
                         this.timeByTag = await timeResponse.json();
 
-                        // Load completed tasks by tag and priority
-                        const completedResponse = await fetch('http://localhost:8000/statistics/completed-tasks-by-tag-priority');
+                        // Load completed tasks by tag and priority with selected period
+                        const completedResponse = await fetch(`http://localhost:8000/statistics/completed-tasks-by-tag-priority?period=${this.selectedPeriod}`);
                         this.completedTasksByTag = await completedResponse.json();
+
+                        // Load total time spent with selected period
+                        const totalTimeResponse = await fetch(`http://localhost:8000/statistics/total-time-spent?period=${this.selectedPeriod}`);
+                        this.totalTimeSpentValue = await totalTimeResponse.json();
+
+                        // Load completed tasks count with selected period
+                        const completedCountResponse = await fetch(`http://localhost:8000/statistics/completed-tasks-count?period=${this.selectedPeriod}`);
+                        this.completedTasksCountValue = await completedCountResponse.json();
                     } catch (error) {
                         console.error('Error loading stats:', error);
                     }

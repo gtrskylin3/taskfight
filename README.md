@@ -5,9 +5,10 @@ TaskFight is a productivity application that combines a todo list, focus timer, 
 ## Features
 
 - **Todo List**: Create and manage tasks with name, priority, tag, and timer
+- **Task Management**: Update, delete, and track tasks with intuitive controls
 - **Focus Timer**: Start, pause, stop, and complete timers for tasks
 - **Gamification**: Track progress with HP bars showing task completion percentage
-- **Statistics Dashboard**: Visualize time spent and completed tasks by tag and priority
+- **Statistics Dashboard**: Visualize time spent and completed tasks by tag and priority with period filtering (Today/Week/Month/Year/All Time)
 - **Filtering**: Filter tasks by tag and view in-progress tasks
 
 ## Tech Stack
@@ -102,10 +103,10 @@ npm run dev
 - `POST /tasks/{task_id}/complete` - Complete a task
 
 ### Statistics
-- `GET /statistics/time-by-tag` - Get time spent by tag
-- `GET /statistics/completed-tasks-by-tag-priority` - Get completed tasks by tag and priority
-- `GET /statistics/total-time-spent` - Get total time spent
-- `GET /statistics/completed-tasks-count` - Get completed tasks count
+- `GET /statistics/time-by-tag?period={day|week|month|year|all}` - Get time spent by tag for a specific period
+- `GET /statistics/completed-tasks-by-tag-priority?period={day|week|month|year|all}` - Get completed tasks by tag and priority for a specific period
+- `GET /statistics/total-time-spent?period={day|week|month|year|all}` - Get total time spent for a specific period
+- `GET /statistics/completed-tasks-count?period={day|week|month|year|all}` - Get completed tasks count for a specific period
 
 ## Project Structure
 
@@ -143,6 +144,18 @@ The application follows a clean architecture pattern with separation of concerns
 - **Repositories**: Handle database operations
 - **Services**: Implement business logic
 - **API**: Define API routes and handle HTTP requests
+
+## Recent Updates
+
+### Task Management
+- **Update Task**: Added ability to edit existing tasks via PUT `/tasks/{task_id}` endpoint
+- **Compact UI**: Removed text labels from action buttons (Update, Delete) to save space, now showing only icons
+- **Progress Visibility**: Progress bar now displays for all tasks (even not started) to show estimated time
+
+### Dashboard Statistics
+- **Period Filtering**: Added time period selector (Today/Week/Month/Year/All Time) to filter statistics
+- **Dynamic Stats**: All dashboard cards now update based on selected period
+- **API Integration**: Statistics endpoints accept `period` query parameter for time-based filtering
 
 ## Contributing
 

@@ -20,9 +20,9 @@ class TaskService:
             return TaskResponse.from_orm(db_task)
         return None
 
-    async def get_tasks(self, skip: int = 0, limit: int = 100) -> List[TaskResponse]:
-        """Get all tasks with pagination"""
-        db_tasks = await self.task_repository.get_tasks(skip, limit)
+    async def get_tasks(self, skip: int = 0, limit: int = 100, period: str = "all") -> List[TaskResponse]:
+        """Get all tasks with pagination and optional period filter"""
+        db_tasks = await self.task_repository.get_tasks(skip, limit, period)
         return [TaskResponse.from_orm(task) for task in db_tasks]
 
     async def get_active_tasks(self, skip: int = 0, limit: int = 100) -> List[TaskResponse]:

@@ -1,12 +1,33 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import update, delete
+from datetime import datetime, timedelta, timezone
 from server.models.task import Task
 
 
 class TaskRepository:
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
+
+    def _get_period_start_date(self, period: str) -> datetime:
+        """
+        Get the start date for a given period (UTC+7)
+        period: 'day', 'week', 'month', 'year', 'all'
+        """
+        tz = timezone(timedelta(hours=7))
+        now = datetime.now(tz)
+        
+        if period == "day":
+            return now.replace(hour=0, minute=0, second=0, microsecond=0)
+        elif period == "week":
+            start_of_week = now - timedelta(days=now.weekday())
+            return start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
+        elif period == "month":
+            return now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        elif period == "year":
+            return now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        else:
+            return now
 
     async def create_task(self, task_data: dict):
         """Create a new task"""
@@ -21,9 +42,17 @@ class TaskRepository:
         result = await self.db_session.execute(select(Task).filter(Task.id == task_id))
         return result.scalar_one_or_none()
 
-    async def get_tasks(self, skip: int = 0, limit: int = 100):
-        """Get all tasks with pagination"""
-        result = await self.db_session.execute(select(Task).offset(skip).limit(limit))
+    async def get_tasks(self, skip: int = 0, limit: int = 100, period: str = "all"):
+        """Get all tasks with pagination and optional period filter"""
+        stmt = select(Task).offset(skip).limit(limit)
+
+        # Apply date filters based on period
+        if period != "all":
+            start_date = self._get_period_start_date(period)
+            stmt = stmt.where(Task.created_at >= start_date)
+
+        result = await self.db_session.execute(stmt)
+
         return result.scalars().all()
 
     async def get_active_tasks(self, skip: int = 0, limit: int = 100):

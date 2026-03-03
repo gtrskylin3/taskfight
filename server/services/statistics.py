@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta, time, timezone
 from typing import Dict, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
@@ -8,13 +8,14 @@ from server.models.task import Task
 class StatisticsService:
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
+        self.tz = timezone(timedelta(hours=7))  # UTC+7
 
     def _get_period_start_date(self, period: str) -> datetime:
         """
-        Get the start date for a given period
+        Get the start date for a given period (UTC+7)
         period: 'day', 'week', 'month', 'year', 'all'
         """
-        now = datetime.utcnow()
+        now = datetime.now(self.tz)
         
         if period == "day":
             # Start of current day (00:00:00)

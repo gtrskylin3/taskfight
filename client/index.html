@@ -63,6 +63,23 @@
                         <span>Add Task</span>
                     </button>
                 </div>
+                <div class="flex flex-wrap gap-2">
+                    <button @click="taskPeriod = 'day'" :class="{ 'filter-btn active': taskPeriod === 'day' }" class="filter-btn text-sm px-3 py-1.5">
+                        Today
+                    </button>
+                    <button @click="taskPeriod = 'week'" :class="{ 'filter-btn active': taskPeriod === 'week' }" class="filter-btn text-sm px-3 py-1.5">
+                        Week
+                    </button>
+                    <button @click="taskPeriod = 'month'" :class="{ 'filter-btn active': taskPeriod === 'month' }" class="filter-btn text-sm px-3 py-1.5">
+                        Month
+                    </button>
+                    <button @click="taskPeriod = 'year'" :class="{ 'filter-btn active': taskPeriod === 'year' }" class="filter-btn text-sm px-3 py-1.5">
+                        Year
+                    </button>
+                    <button @click="taskPeriod = 'all'" :class="{ 'filter-btn active': taskPeriod === 'all' }" class="filter-btn text-sm px-3 py-1.5">
+                        All Time
+                    </button>
+                </div>
 
                 <!-- Task Creation Modal -->
                 <div x-show="openTaskModal" class="modal-overlay" x-cloak>
@@ -424,6 +441,7 @@
                 activeFilter: 'all',
                 selectedTag: '',
                 selectedPeriod: 'day',
+                taskPeriod: 'all',
                 openUpdateModalFlag: false,
                 editingTask: {
                     id: null,
@@ -510,18 +528,26 @@
                 async init() {
                     await this.loadTasks();
                     await this.loadStats();
-                    
+
                     // Watch for period changes and reload stats
                     this.$watch('selectedPeriod', () => {
                         this.loadStats();
+                    });
+
+                    // Watch for task period changes and reload tasks
+                    this.$watch('taskPeriod', (value) => {
+                        console.log(`taskPeriod changed to: ${value}`);
+                        this.loadTasks();
                     });
                 },
 
                 async loadTasks() {
                     try {
                         // Load all tasks for both main view and statistics
-                        const response = await fetch('http://localhost:8000/tasks');
-                        this.tasks = await response.json();
+                        const response = await fetch(`http://localhost:8000/tasks?period=${this.taskPeriod}`);
+                        const newTasks = await response.json();
+                        console.log(`Loaded ${newTasks.length} tasks for period: ${this.taskPeriod}`, newTasks);
+                        this.tasks = newTasks;
                     } catch (error) {
                         console.error('Error loading tasks:', error);
                     }
